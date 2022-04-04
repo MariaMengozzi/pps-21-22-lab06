@@ -103,4 +103,13 @@ project/plugins/project/
 .cache
 .lib/
 
+.idea
+idea/workspace.xml
+idea/usage.statistics.xml
+idea/tasks.xml
+idea/shelf
+scalafmt.conf
+.bsp
+project/*
+
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,sbt
