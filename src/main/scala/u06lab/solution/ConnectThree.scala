@@ -26,9 +26,13 @@ object ConnectThree extends App:
 
   import Player.*
 
-  def find(board: Board, x: Int, y: Int): Option[Player] = ???
+  def find(board: Board, x: Int, y: Int): Option[Player] =
+    val elem = board.filter( d => d.x == x && d.y == y)
+    if elem.isEmpty then None else Some(elem.head.player)
 
-  def firstAvailableRow(board: Board, x: Int): Option[Int] = ???
+  def firstAvailableRow(board: Board, x: Int): Option[Int] =
+    val zip = board.filter(d => d.x == x)
+    if zip.size - 1 == bound then None else Some(zip.size)
 
   def placeAnyDisk(board: Board, player: Player): Seq[Board] = ???
 
