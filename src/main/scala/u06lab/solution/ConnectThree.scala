@@ -34,9 +34,19 @@ object ConnectThree extends App:
     val zip = board.filter(d => d.x == x)
     if zip.size - 1 == bound then None else Some(zip.size)
 
-  def placeAnyDisk(board: Board, player: Player): Seq[Board] = ???
+  def placeAnyDisk(board: Board, player: Player): Seq[Board] =
+    List.range(0, bound +1).foldLeft(Seq(): Seq[Board])((s, x) =>
+      val y = firstAvailableRow(board, x)
+      if y != None then (board :+ Disk(x, y.get, player)) +: s else s)
 
-  def computeAnyGame(player: Player, moves: Int): LazyList[Game] = ???
+  def computeAnyGame(player: Player, moves: Int): LazyList[Game] = moves match
+    case 0 => LazyList(Seq(Seq()))
+    case _ =>
+      for
+        game <- computeAnyGame(if player == X then O else X, moves-1)
+        board <- placeAnyDisk(game.head, player)
+      yield
+        board +: game
 
   def printBoards(game: Seq[Board]): Unit =
     for
@@ -49,7 +59,7 @@ object ConnectThree extends App:
         print(" ")
         if board == game.head then println()
 
-  // Exercise 1: implement find such that..
+/*  // Exercise 1: implement find such that..
   println("EX 1: ")
   println(find(List(Disk(0, 0, X)), 0, 0)) // Some(X)
   println(find(List(Disk(0, 0, X), Disk(0, 1, O), Disk(0, 2, X)), 0, 1)) // Some(O)
@@ -72,7 +82,11 @@ object ConnectThree extends App:
   // .... .... .... ....
   // .... .... .... ....
   // ...X .... .... ....
-  // ...O ..XO .X.O X..O
+  // ...O ..XO .X.O X..O*/
+// esempio di Board
+  println("esempio di Board")
+  printBoards(Seq(List(Disk(0, 0, X), Disk(0, 1, X), Disk(0, 2, X), Disk(0, 3, X))))
+  println()
   println("EX 3: ")
 // Exercise 3 (ADVANCED!): implement computeAnyGame such that..
   computeAnyGame(O, 4).foreach { g =>
