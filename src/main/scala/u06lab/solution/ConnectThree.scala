@@ -1,5 +1,7 @@
 package u06lab.solution
 
+import u06lab.code.ConnectThree
+
 import java.util.OptionalInt
 
 object ConnectThree extends App:
@@ -43,10 +45,95 @@ object ConnectThree extends App:
     case 0 => LazyList(Seq(Seq()))
     case _ =>
       for
-        game <- computeAnyGame(if player == X then O else X, moves-1)
+        game <- computeAnyGame(if player == X then O else X, moves - 1)
         board <- placeAnyDisk(game.head, player)
       yield
-        board +: game
+          board +: game
+
+
+  def computeAnyGame2(player: Player, moves: Int): LazyList[Game] = moves match
+    case 0 => LazyList(Seq(Seq()))
+    case _ =>
+      for
+        game <- computeAnyGame(if player == X then O else X, moves - 1)
+        board <- placeAnyDisk(game.head, player)
+      yield
+        if (win(board)) // todo not work well
+          game
+        else
+          board +: game
+
+
+  def win(board: Board): Boolean =
+    var win = false
+    for
+      p <- List(X, O)
+    do
+      win = win || checkRow(board, p) || checkCol(board, p)
+    win
+
+
+  def checkRow(board: Board, player: Player): Boolean =
+    var out = false
+    for
+      y <- 0 to bound+1
+      f = board.filter(d => d.player == player && d.y == y)
+      if !f.isEmpty
+    do
+        out = out || f.filter(d => d.x >= f.map(di => di.x).min && d.x < f.map(di => di.x).min + bound).size == bound
+    out
+
+  def checkCol(board: Board, player: Player): Boolean =
+    var out = false
+    for
+      x <- 0 to bound+1
+      f = board.filter(d => d.player == player && d.x == x)
+      if !f.isEmpty
+    do
+      out = out || f.filter(d => d.y >= f.map(di => di.y).min && d.y < f.map(di => di.y).min + bound).size == bound
+    out
+
+  def checkDiag(board: Board): Boolean =
+
+    //board.tail.filter(d => ( d.x - board.head.x).abs == (d.y - board.head.y).abs).size == bound
+    val player = board.head.player
+    var checkAsc = 0
+    for
+      x <- bound to (bound + 1)
+    do
+      checkAsc = 0
+      for
+        y <- bound to (bound + 1)
+      do
+        if board.contains(Disk(x,y,player)) then
+          checkAsc = checkAsc + 1
+          for
+              c <- 0 to bound
+              if board.contains(Disk(x,y,player))
+          do
+            checkAsc = checkAsc + 1
+    if checkAsc == bound then println("diagonale")
+    checkAsc == bound
+
+  def checkDiscDiag(board: Board, player: Player): Boolean =
+    var checkDis = 0
+    for
+      x <- bound to (bound + 1)
+    do
+      checkDis = 0
+      for
+        y <- bound to (bound + 1)
+      do
+        if board.contains(Disk(x,y,player)) then
+          checkDis = checkDis + 1
+          for
+            c <- 0 to bound
+            if board.contains(Disk(x,y,player))
+          do
+            checkDis = checkDis + 1
+    if checkDis == bound then println("diagonale")
+    checkDis == bound
+
 
   def printBoards(game: Seq[Board]): Unit =
     for
@@ -84,15 +171,15 @@ object ConnectThree extends App:
   // ...X .... .... ....
   // ...O ..XO .X.O X..O*/
 // esempio di Board
-  println("esempio di Board")
+/*  println("esempio di Board")
   printBoards(Seq(List(Disk(0, 0, X), Disk(0, 1, X), Disk(0, 2, X), Disk(0, 3, X))))
-  println()
-  println("EX 3: ")
+  println()*/
+/*  println("EX 3: ")
 // Exercise 3 (ADVANCED!): implement computeAnyGame such that..
   computeAnyGame(O, 4).foreach { g =>
     printBoards(g)
     println()
-  }
+  }*/
 //  .... .... .... .... ...O
 //  .... .... .... ...X ...X
 //  .... .... ...O ...O ...O
@@ -105,3 +192,48 @@ object ConnectThree extends App:
 // .... X... X... X... X...
 
 // Exercise 4 (VERY ADVANCED!) -- modify the above one so as to stop each game when someone won!!
+
+  val wr1 = List(Disk(0, 0, X), Disk(1, 0, X), Disk(2, 0, X), Disk(0, 3, O)) //win x
+  val wr2 = List(Disk(0, 0, O), Disk(1, 0, X), Disk(2, 0, X), Disk(3, 0, O), Disk(0, 1, O), Disk(1, 1, X), Disk(2, 1, X), Disk(0, 2, X), Disk(3,1,X)) //win x
+  val wr3 = List(Disk(0, 0, O), Disk(1, 0, O), Disk(2, 0, O), Disk(3, 0, O), Disk(0, 1, O), Disk(1, 1, X), Disk(2, 1, X), Disk(0, 2, X), Disk(3,1,X)) //win x
+  val wr4_O = List(Disk(1,0,O), Disk(2,0,O), Disk(3,0,O), Disk(1,1,X), Disk(3,1,X))
+
+  val lr1 = List(Disk(0, 0, O), Disk(1, 0, X), Disk(2, 0, X), Disk(0, 3, O)) //lose x
+  val lr2 = List(Disk(0, 0, O), Disk(1, 0, X), Disk(2, 0, X), Disk(3, 0, O), Disk(0, 1, O), Disk(1, 1, X), Disk(2, 1, X), Disk(0, 2, X)) //lose x
+
+  val wc1 = List(Disk(0, 0, X), Disk(0, 1, X), Disk(0, 2, X), Disk(0, 3, O)) //win x
+  val wc2 = List(Disk(0, 0, O), Disk(1, 0, O), Disk(1, 1, X), Disk(1, 2, X), Disk(1, 3, X), Disk(3, 0, X)) //win x
+
+  val lc1 = List(Disk(0, 0, O), Disk(0, 1, X), Disk(0, 2, X), Disk(0, 3, O)) //lose x
+  val lc2 = List(Disk(0, 0, O), Disk(1, 0, O), Disk(1, 1, X), Disk(1, 2, X), Disk(1, 3, O), Disk(3, 0, X)) //lose x
+
+  println(win(wr4_O))
+/*  println("test win on row")
+  // test row Win
+  println (checkRow(wr1, X) || checkRow(wr2, X) || checkRow(wr3, X)) //true
+  println(checkRow(wr4_O, O)) //true
+  // test row no Win
+  println(checkRow(lr1, X) || checkRow(lr2, X)) //false
+
+  println("test win on col")
+  // test row Win
+  println (checkCol(wc1, X) || checkCol(wc2, X)) //true
+  // test row no Win
+  println (checkCol(lc1, X) || checkCol(lc2, X)) //false
+
+  println("test win row no cols")
+  println(checkRow(wr1, X) || checkCol(wr1, X)) //true
+  println("test win cols no row")
+  println(checkRow(wc1, X) || checkCol(wc1, X)) //false
+
+  println("test win")
+  println(win(wr4_O)) //true
+
+  println("test lose")
+  println(win(lc1)) //false*/
+
+
+  computeAnyGame2(O, 7).foreach { g =>
+    printBoards(g)
+    println()
+  }
