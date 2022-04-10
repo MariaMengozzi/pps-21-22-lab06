@@ -76,7 +76,7 @@ object ConnectThree extends App:
   def checkRow(board: Board, player: Player): Boolean =
     var out = false
     for
-      y <- 0 to bound+1
+      y <- 0 to bound
       f = board.filter(d => d.player == player && d.y == y)
       if !f.isEmpty
     do
@@ -86,53 +86,29 @@ object ConnectThree extends App:
   def checkCol(board: Board, player: Player): Boolean =
     var out = false
     for
-      x <- 0 to bound+1
+      x <- 0 to bound
       f = board.filter(d => d.player == player && d.x == x)
       if !f.isEmpty
     do
       out = out || f.filter(d => d.y >= f.map(di => di.y).min && d.y < f.map(di => di.y).min + bound).size == bound
     out
 
-  def checkDiag(board: Board): Boolean =
-
-    //board.tail.filter(d => ( d.x - board.head.x).abs == (d.y - board.head.y).abs).size == bound
-    val player = board.head.player
-    var checkAsc = 0
+  def checkDiag(board: Board, player: Player): Boolean =
+    var out = false
+    var count = 0
     for
-      x <- bound to (bound + 1)
+      x <- 0 to bound
     do
-      checkAsc = 0
+      count = 0
       for
-        y <- bound to (bound + 1)
+        y <- 0 to bound
+        c <- 0 to bound
+        p = find(board, x-c, y+c)
       do
-        if board.contains(Disk(x,y,player)) then
-          checkAsc = checkAsc + 1
-          for
-              c <- 0 to bound
-              if board.contains(Disk(x,y,player))
-          do
-            checkAsc = checkAsc + 1
-    if checkAsc == bound then println("diagonale")
-    checkAsc == bound
-
-  def checkDiscDiag(board: Board, player: Player): Boolean =
-    var checkDis = 0
-    for
-      x <- bound to (bound + 1)
-    do
-      checkDis = 0
-      for
-        y <- bound to (bound + 1)
-      do
-        if board.contains(Disk(x,y,player)) then
-          checkDis = checkDis + 1
-          for
-            c <- 0 to bound
-            if board.contains(Disk(x,y,player))
-          do
-            checkDis = checkDis + 1
-    if checkDis == bound then println("diagonale")
-    checkDis == bound
+        if !p.isEmpty && p.get == player then
+          count = count + 1
+          out = out || count == bound
+    out
 
 
   def printBoards(game: Seq[Board]): Unit =
@@ -174,7 +150,7 @@ object ConnectThree extends App:
 /*  println("esempio di Board")
   printBoards(Seq(List(Disk(0, 0, X), Disk(0, 1, X), Disk(0, 2, X), Disk(0, 3, X))))
   println()*/
-/*  println("EX 3: ")
+/* println("EX 3: ")
 // Exercise 3 (ADVANCED!): implement computeAnyGame such that..
   computeAnyGame(O, 4).foreach { g =>
     printBoards(g)
@@ -207,7 +183,11 @@ object ConnectThree extends App:
   val lc1 = List(Disk(0, 0, O), Disk(0, 1, X), Disk(0, 2, X), Disk(0, 3, O)) //lose x
   val lc2 = List(Disk(0, 0, O), Disk(1, 0, O), Disk(1, 1, X), Disk(1, 2, X), Disk(1, 3, O), Disk(3, 0, X)) //lose x
 
-  println(win(wr4_O))
+  val wda = List(Disk(0, 0, X), Disk(1, 0 , O), Disk (2, 0, O), Disk(0, 1, O), Disk(1, 1, X), Disk(2, 1, X), Disk(0, 2, X), Disk(1, 2, O), Disk(2, 2, X))
+  val wdd = List(Disk(0, 0, X), Disk(1, 0 , O), Disk (2, 0, O), Disk(3, 0, X), Disk(0, 1, O), Disk(1, 1, X), Disk(2, 1, X), Disk(0, 2, X), Disk(1, 2, O))
+  val wd2 = List(Disk(1, 1, X), Disk(2, 2, X), Disk(3, 3, X), Disk(1, 0 ,O), Disk(2, 0, X))
+  printBoards(Seq(wd2))
+
 /*  println("test win on row")
   // test row Win
   println (checkRow(wr1, X) || checkRow(wr2, X) || checkRow(wr3, X)) //true
@@ -224,7 +204,7 @@ object ConnectThree extends App:
   println("test win row no cols")
   println(checkRow(wr1, X) || checkCol(wr1, X)) //true
   println("test win cols no row")
-  println(checkRow(wc1, X) || checkCol(wc1, X)) //false
+  println(checkRow(wc1, X) || checkCol(wc1, X)) //true
 
   println("test win")
   println(win(wr4_O)) //true
@@ -232,8 +212,13 @@ object ConnectThree extends App:
   println("test lose")
   println(win(lc1)) //false*/
 
+  println("test ascendent diagonal -> /")
+  println(checkDiag(wda, X))
+  println(checkDiag(wdd, X))
+  println(checkDiag(wd2, X))
+  println(checkDiag(wr1, X))
 
-  computeAnyGame2(O, 7).foreach { g =>
+/*  computeAnyGame2(O, 7).foreach { g =>
     printBoards(g)
     println()
-  }
+  }*/
