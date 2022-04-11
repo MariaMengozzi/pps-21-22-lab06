@@ -69,7 +69,7 @@ object ConnectThree extends App:
     for
       p <- List(X, O)
     do
-      win = win || checkRow(board, p) || checkCol(board, p)
+      win = win || checkRow(board, p) || checkCol(board, p) || checkDiag(board, p)
     win
 
 
@@ -210,13 +210,20 @@ object ConnectThree extends App:
   println(win(wr4_O)) //true
 
   println("test lose")
-  println(win(lc1)) //false*/
+  println(win(lc1)) //false
 
-  println("test ascendent diagonal -> /")
+  println("test diagonal -> /")
   println(checkDiag(wda, X))
   println(checkDiag(wdd, X))
   println(checkDiag(wd2, X))
-  println(checkDiag(wr1, X))
+  println(checkDiag(wr1, X)) */
+
+  println("Test 3 check")
+  println(win(wr1)) // true
+  println(win(wc1)) //true
+  println(win(wda)) //true
+
+  println(win(lc2)) // false
 
 /*  computeAnyGame2(O, 7).foreach { g =>
     printBoards(g)
