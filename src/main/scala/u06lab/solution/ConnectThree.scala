@@ -55,13 +55,13 @@ object ConnectThree extends App:
     case 0 => LazyList(Seq(Seq()))
     case _ =>
       for
-        game <- computeAnyGame(if player == X then O else X, moves - 1)
+        game <- computeAnyGame2(if player == X then O else X, moves - 1)
         board <- placeAnyDisk(game.head, player)
       yield
-        if (win(board)) // todo not work well
-          game
+        if (win(game.head))
+          game.distinct
         else
-          board +: game
+          (board +: game).distinct
 
 
   def win(board: Board): Boolean =
@@ -94,21 +94,44 @@ object ConnectThree extends App:
     out
 
   def checkDiag(board: Board, player: Player): Boolean =
-    var out = false
-    var count = 0
-    for
-      x <- 0 to bound
-    do
-      count = 0
+    def ascending(board: Board, player: Player): Boolean =
+      //ascending -> /
+      var count = 0
+      var out = false
       for
-        y <- 0 to bound
-        c <- 0 to bound
-        p = find(board, x-c, y+c)
+        x <- 0 to bound - (bound-1)
+        y <- 0 to bound - (bound-1)
       do
-        if !p.isEmpty && p.get == player then
-          count = count + 1
+        count = 0
+        for
+          c <- 0 until bound
+          p = find(board, x+c, y+c)
+        do
+          if !p.isEmpty && p.get == player then
+            count = count + 1
           out = out || count == bound
-    out
+      out
+
+    def descending(board: Board, player: Player): Boolean =
+      //descending -> \
+      var count = 0
+      var out = false
+      for
+        x <- bound to bound - (bound-1) by -1
+        y <- 0 to bound - (bound-1)
+      do
+        count = 0
+        for
+          c <- 0 until bound
+        do
+          val p = find(board, x-c, y+c)
+          if !p.isEmpty && p.get == player then
+            //println((x-c) + " " + (y+c))
+            count = count + 1
+          out = out || count == bound
+      out
+
+    ascending(board, player) || descending(board, player)
 
 
   def printBoards(game: Seq[Board]): Unit =
@@ -184,11 +207,11 @@ object ConnectThree extends App:
   val lc2 = List(Disk(0, 0, O), Disk(1, 0, O), Disk(1, 1, X), Disk(1, 2, X), Disk(1, 3, O), Disk(3, 0, X)) //lose x
 
   val wda = List(Disk(0, 0, X), Disk(1, 0 , O), Disk (2, 0, O), Disk(0, 1, O), Disk(1, 1, X), Disk(2, 1, X), Disk(0, 2, X), Disk(1, 2, O), Disk(2, 2, X))
-  val wdd = List(Disk(0, 0, X), Disk(1, 0 , O), Disk (2, 0, O), Disk(3, 0, X), Disk(0, 1, O), Disk(1, 1, X), Disk(2, 1, X), Disk(0, 2, X), Disk(1, 2, O))
+  val wdd = List(Disk(0, 0, X), Disk(1, 0 , O), Disk (2, 0, O), Disk(3, 0, X), Disk(0, 1, O), Disk(1, 1, X), Disk(2, 1, X), Disk(0, 2, O), Disk(1, 2, X))
   val wd2 = List(Disk(1, 1, X), Disk(2, 2, X), Disk(3, 3, X), Disk(1, 0 ,O), Disk(2, 0, X))
+/*
   printBoards(Seq(wd2))
-
-/*  println("test win on row")
+  println("test win on row")
   // test row Win
   println (checkRow(wr1, X) || checkRow(wr2, X) || checkRow(wr3, X)) //true
   println(checkRow(wr4_O, O)) //true
@@ -216,7 +239,24 @@ object ConnectThree extends App:
   println(checkDiag(wda, X))
   println(checkDiag(wdd, X))
   println(checkDiag(wd2, X))
-  println(checkDiag(wr1, X)) */
+  println(checkDiag(wr1, X))
+
+  println("test diagonal -> \\")
+  println(checkDiag(wda, X))
+  println(checkDiag(wdd, X))
+  println(checkDiag(wd2, X))
+  println(checkDiag(wr1, X))
+
+  val l = List(Disk(0,0,O), Disk(1,0,X), Disk(0,1,X), Disk(1,1,O), Disk(0,2,O), Disk(1,2,X))
+  /*printBoards(Seq(l))
+  println(checkRow(l, X))
+  println(checkRow(l, O))
+
+  println(checkCol(l, X))
+  println(checkCol(l, O))*/
+
+  println(checkDiag(l, X))
+  println(checkDiag(l, O))
 
   println("Test 3 check")
   println(win(wr1)) // true
@@ -225,7 +265,11 @@ object ConnectThree extends App:
 
   println(win(lc2)) // false
 
-/*  computeAnyGame2(O, 7).foreach { g =>
+  val l2 = List(Disk(0,0,X), Disk(0,0,X), Disk(1,0,O), Disk(2,0,O), Disk(2,0,X))
+  println(win(l2))
+  */
+
+  computeAnyGame2(O, 7).foreach { g =>
     printBoards(g)
     println()
-  }*/
+  }
