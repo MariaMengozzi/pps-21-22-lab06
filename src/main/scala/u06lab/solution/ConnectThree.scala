@@ -29,12 +29,11 @@ object ConnectThree extends App:
   import Player.*
 
   def find(board: Board, x: Int, y: Int): Option[Player] =
-    val elem = board.filter( d => d.x == x && d.y == y)
-    if elem.isEmpty then None else Some(elem.head.player)
+    board.filter( d => d.x == x && d.y == y).map(d=> d.player).headOption
 
   def firstAvailableRow(board: Board, x: Int): Option[Int] =
-    val zip = board.filter(d => d.x == x)
-    if zip.size - 1 == bound then None else Some(zip.size)
+    val f = board.filter(d => d.x == x)
+    Option.when(f.size-1 < bound)(f.size)
 
   def placeAnyDisk(board: Board, player: Player): Seq[Board] =
     List.range(0, bound +1).foldLeft(Seq(): Seq[Board])((s, x) =>
@@ -51,17 +50,19 @@ object ConnectThree extends App:
           board +: game
 
 
-  def computeAnyGame2(player: Player, moves: Int): LazyList[Game] = moves match
-    case 0 => LazyList(Seq(Seq()))
-    case _ =>
-      for
-        game <- computeAnyGame2(if player == X then O else X, moves - 1)
-        board <- placeAnyDisk(game.head, player)
-      yield
-        if (win(game.head))
-          game.distinct
-        else
-          (board +: game).distinct
+  def computeAnyGame2(player: Player, moves: Int): LazyList[Game] =
+    def _computeAnyGame(player: Player, moves: Int): LazyList[Game] = moves match
+      case 0 => LazyList(Seq(Seq()))
+      case _ =>
+        for
+          game <- _computeAnyGame(if player == X then O else X, moves - 1)
+          board <- placeAnyDisk(game.head, player)
+        yield
+          if (win(game.head))
+            game
+          else
+            board +: game
+    _computeAnyGame(player, moves).distinct
 
 
   def win(board: Board): Boolean =
